@@ -33,7 +33,7 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<ListRecyclerVi
         }
 
         public void setListDate(Date date){
-            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyy HH:mm");
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyy");
             dateView.setText(dateFormat.format(date));
         }
     }

@@ -15,7 +15,6 @@ import com.gosiewski.shoppinglist.R;
 import com.gosiewski.shoppinglist.adapters.ListRecyclerViewAdapter;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class ListsActivity extends AppCompatActivity {
@@ -29,12 +28,23 @@ public class ListsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lists);
 
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setTitle("Lists");
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return true;
+                return false;
             }
 
             @Override
@@ -59,24 +69,10 @@ public class ListsActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        lists = new LinkedList<>();
+        lists = ShoppingList.getAll();
 
         adapter = new ListRecyclerViewAdapter(lists);
         recyclerView.setAdapter(adapter);
-
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null)
-            actionBar.setTitle("Lists");
-
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        lists.clear();
-        lists.addAll(ShoppingList.getAll());
-        adapter.notifyDataSetChanged();
     }
 
     @Override

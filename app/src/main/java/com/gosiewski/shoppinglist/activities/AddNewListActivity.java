@@ -51,7 +51,7 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
     }
 
     public void showDataPickerDialog(View view){
-        DialogFragment newFragment = new DatePickerFragment();
+        DialogFragment newFragment = DatePickerFragment.newInstance(this);
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
