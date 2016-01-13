@@ -3,6 +3,7 @@ package com.gosiewski.shoppinglist.model;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -12,8 +13,16 @@ import java.util.TimeZone;
 
 @Table(name = "lists")
 public class ShoppingList extends Model {
-    @Column(name = "name") public String name;
-    @Column(name = "timestamp") public long timestamp;
+    @Column(name = "name") private String name;
+    @Column(name = "timestamp") private long timestamp;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public ShoppingList() {
         super();
@@ -23,6 +32,11 @@ public class ShoppingList extends Model {
         super();
         this.name = name;
         setDate(date);
+    }
+
+    public void addItem(String name){
+        ShoppingItem item = new ShoppingItem(name, this);
+        item.save();
     }
 
     public List<ShoppingItem> items() {
@@ -39,5 +53,12 @@ public class ShoppingList extends Model {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
         this.timestamp = calendar.getTimeInMillis();
+    }
+
+    public static List<ShoppingList> getAll(){
+        return new Select()
+                .from(ShoppingList.class)
+                .orderBy("name DESC")
+                .execute();
     }
 }
