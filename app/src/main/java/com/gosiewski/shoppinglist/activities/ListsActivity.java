@@ -12,7 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.gosiewski.shoppinglist.R;
-import com.gosiewski.shoppinglist.adapters.ListRecyclerViewAdapter;
+import com.gosiewski.shoppinglist.adapters.ShoppingListAdapter;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class ListsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_lists);
 
         recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
@@ -52,7 +52,7 @@ public class ListsActivity extends AppCompatActivity {
                 if(e.getAction() == MotionEvent.ACTION_UP) {
                     View view = rv.findChildViewUnder(e.getX(), e.getY());
                     if(view != null){
-                        ShoppingList list = ((ListRecyclerViewAdapter) rv.getAdapter()).getItemAt(rv.getChildAdapterPosition(view));
+                        ShoppingList list = ((ShoppingListAdapter) rv.getAdapter()).getItemAt(rv.getChildAdapterPosition(view));
                         showList(list);
                     }
                 }
@@ -71,7 +71,7 @@ public class ListsActivity extends AppCompatActivity {
 
         lists = ShoppingList.getAll();
 
-        adapter = new ListRecyclerViewAdapter(lists);
+        adapter = new ShoppingListAdapter(lists);
         recyclerView.setAdapter(adapter);
     }
 

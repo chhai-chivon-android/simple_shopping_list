@@ -34,13 +34,12 @@ public class ShoppingList extends Model {
         setDate(date);
     }
 
-    public void addItem(String name){
-        ShoppingItem item = new ShoppingItem(name, this);
+    public void addItem(ShoppingItem item){
         item.save();
     }
 
     public List<ShoppingItem> items() {
-        return getMany(ShoppingItem.class, "List");
+        return getMany(ShoppingItem.class, "list");
     }
 
     public Date getDate() {
@@ -58,7 +57,7 @@ public class ShoppingList extends Model {
     public static List<ShoppingList> getAll(){
         return new Select()
                 .from(ShoppingList.class)
-                .orderBy("name DESC")
+                .orderBy("timestamp ASC")
                 .execute();
     }
 }
