@@ -8,11 +8,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.gosiewski.shoppinglist.R;
 import com.gosiewski.shoppinglist.adapters.ShoppingListAdapter;
+import com.gosiewski.shoppinglist.listeners.CustomItemClickListener;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
 import java.util.List;
@@ -22,6 +22,7 @@ public class ListsActivity extends AppCompatActivity {
     private RecyclerView.Adapter adapter;
     private List<ShoppingList> lists;
     private RecyclerView.LayoutManager layoutManager;
+    public final static String EXTRA_LIST_ID = "com.gosiewski.shoppinglist.LISTID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,29 +42,6 @@ public class ListsActivity extends AppCompatActivity {
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_lists);
 
-        recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-                if(e.getAction() == MotionEvent.ACTION_UP) {
-                    View view = rv.findChildViewUnder(e.getX(), e.getY());
-                    if(view != null){
-                        ShoppingList list = ((ShoppingListAdapter) rv.getAdapter()).getItemAt(rv.getChildAdapterPosition(view));
-                        showList(list);
-                    }
-                }
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
-
         recyclerView.setHasFixedSize(true);
 
         layoutManager = new LinearLayoutManager(this);
@@ -71,7 +49,12 @@ public class ListsActivity extends AppCompatActivity {
 
         lists = ShoppingList.getAll();
 
-        adapter = new ShoppingListAdapter(lists);
+        adapter = new ShoppingListAdapter(lists, new CustomItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                showList(lists.get(position));
+            }
+        });
         recyclerView.setAdapter(adapter);
     }
 
@@ -99,6 +82,8 @@ public class ListsActivity extends AppCompatActivity {
     }
 
     private void showList(ShoppingList list){
-
+        Intent intent = new Intent(this, ListDetailsActivity.class);
+        intent.putExtra(EXTRA_LIST_ID, list.getId());
+        startActivity(intent);
     }
 }

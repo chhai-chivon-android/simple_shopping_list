@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.gosiewski.shoppinglist.R;
 import com.gosiewski.shoppinglist.adapters.NewShoppingItemAdapter;
@@ -19,10 +20,10 @@ import com.gosiewski.shoppinglist.fragments.DatePickerFragment;
 import com.gosiewski.shoppinglist.model.ShoppingItem;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class AddNewListActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
@@ -62,7 +63,9 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
                 if (e.getAction() == MotionEvent.ACTION_UP) {
                     View view = rv.findChildViewUnder(e.getX(), e.getY());
                     if (view != null) {
-
+                        items.remove(rv.getChildAdapterPosition(view));
+                        adapter.notifyDataSetChanged();
+                        //TODO: Change it for working listener, like in ShoppingListAdapter
                     }
                 }
             }
@@ -85,22 +88,32 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
     public void onDateSet(DatePicker view, int year, int month, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
-        shoppingList.setDate(calendar.getTime());
+        Date date = calendar.getTime();
+        shoppingList.setDate(date);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyy");
         Button showDatePickerButton = (Button) findViewById(R.id.show_date_picker_button);
-        showDatePickerButton.setText(dateFormat.format(calendar.getTime()));
+        showDatePickerButton.setText(SimpleDateFormat.getDateInstance().format(date));
     }
 
-    public void addItem(View view){
+    public void addItem(View view) {
         EditText itemNameEdit = (EditText) findViewById(R.id.new_item_name);
+        if (itemNameEdit.getText().toString().equals("")) {
+            Toast.makeText(this, "Enter item name!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String itemName = (itemNameEdit.getText().toString());
+        itemNameEdit.setText("");
         items.add(new ShoppingItem(itemName, shoppingList));
         adapter.notifyDataSetChanged();
+        Toast.makeText(this, "Item added", Toast.LENGTH_SHORT).show();
     }
 
-    public void saveList(View view){
+    public void saveList(View view) {
         EditText nameEdit = (EditText) findViewById(R.id.list_name);
+        if (nameEdit.getText().toString().equals("")) {
+            Toast.makeText(this, "Enter list name!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         shoppingList.setName(nameEdit.getText().toString());
         for(ShoppingItem item : items){
             shoppingList.addItem(item);
@@ -110,7 +123,7 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
         finish();
     }
 
-    public void showDataPickerDialog(View view){
+    public void showDataPickerDialog(View view) {
         DialogFragment newFragment = DatePickerFragment.newInstance(this);
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }

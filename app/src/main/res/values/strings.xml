@@ -6,4 +6,5 @@
     <string name="add_item_button">Add item</string>
     <string name="item_name_hint">Item name</string>
     <string name="save_list_button">Save list!</string>
+    <string name="item_touch_effect">(Touch to delete)</string>
 </resources>

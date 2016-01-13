@@ -3,7 +3,6 @@ package com.gosiewski.shoppinglist.adapters;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -20,6 +19,7 @@ public class NewShoppingItemAdapter extends RecyclerView.Adapter<NewShoppingItem
 
         public ViewHolder(RelativeLayout v) {
             super(v);
+
             nameView = (TextView) v.findViewById(R.id.item_name);
         }
     }
@@ -29,23 +29,22 @@ public class NewShoppingItemAdapter extends RecyclerView.Adapter<NewShoppingItem
     }
 
     @Override
-    public NewShoppingItemAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
+    public NewShoppingItemAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RelativeLayout view = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_new_shopping_item, parent, false);
-        ViewHolder vh = new ViewHolder(view);
-        return vh;
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.nameView.setText(items.get(position).name);
+        holder.nameView.setText(getItemAt(position).name);
     }
 
     @Override
-    public int getItemCount(){
+    public int getItemCount() {
         return items.size();
     }
 
-    public ShoppingItem getItemAt(int index){
+    public ShoppingItem getItemAt(int index) {
         return items.get(index);
     }
 }

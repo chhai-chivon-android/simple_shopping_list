@@ -1,57 +1,62 @@
 package com.gosiewski.shoppinglist.adapters;
 
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.gosiewski.shoppinglist.R;
+import com.gosiewski.shoppinglist.listeners.CustomItemClickListener;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ViewHolder> {
     private List<ShoppingList> lists;
+    CustomItemClickListener listener;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView nameView;
-        public TextView dateView;
+        private TextView nameView;
+        private TextView dateView;
 
-        public ViewHolder(CardView v){
+        public ViewHolder(View v) {
             super(v);
+
             this.nameView = (TextView) v.findViewById(R.id.list_name);
             this.dateView = (TextView) v.findViewById(R.id.list_date);
         }
 
-        public void setListName(String name){
+        public void setList(String name, Date date){
             nameView.setText(name);
-        }
-
-        public void setListDate(Date date){
-            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyy");
-            dateView.setText(dateFormat.format(date));
+            dateView.setText(SimpleDateFormat.getDateInstance().format(date));
         }
     }
 
-    public ShoppingListAdapter(List<ShoppingList> lists) {
+    public ShoppingListAdapter(List<ShoppingList> lists, CustomItemClickListener listener) {
         this.lists = lists;
+        this.listener = listener;
     }
 
     @Override
     public ShoppingListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        CardView view = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shoppping_list, parent, false);
-        ViewHolder vh = new ViewHolder(view);
-        return vh;
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shoppping_list, parent, false);
+        final ViewHolder viewHolder = new ViewHolder(view);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onItemClick(v, viewHolder.getPosition());
+                //TODO: It works, but only when u click between two lists. Why ? Repair it !
+            }
+        });
+        return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.setListName(lists.get(position).getName());
-        holder.setListDate(lists.get(position).getDate());
+        holder.setList(getItemAt(position).getName(), getItemAt(position).getDate());
     }
 
     @Override
