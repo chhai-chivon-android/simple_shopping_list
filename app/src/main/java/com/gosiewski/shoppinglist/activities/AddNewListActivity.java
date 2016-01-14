@@ -34,24 +34,25 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
     private RecyclerView.LayoutManager layoutManager;
     private List<ShoppingItem> items;
     private RecyclerView.Adapter adapter;
+    private Button showDatePickerButton;
+    private EditText nameEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_list);
 
-        shoppingList = new ShoppingList();
-        items = new ArrayList<>();
+        showDatePickerButton = (Button) findViewById(R.id.show_date_picker_button);
+        nameEdit = (EditText) findViewById(R.id.list_name);
 
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null)
-            actionBar.setTitle("New list");
-    }
+        long listId = getIntent().getLongExtra(ListDetailsActivity.EXTRA_EDIT_LIST_ID, -1);
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        recyclerView = (RecyclerView) findViewById(R.id.item_recycler_view);
+        if(listId < 0)
+            initEmptyList();
+        else
+            initSelectedList(listId);
+
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_new_shopping_items);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -62,7 +63,10 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
                     public boolean onSingleTapConfirmed(MotionEvent e) {
                         View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
                         if(view != null){
-                            items.remove(((NewShoppingItemAdapter) recyclerView.getAdapter()).getItemAt(recyclerView.getChildAdapterPosition(view)));
+                            ShoppingItem item = ((NewShoppingItemAdapter) recyclerView.getAdapter()).getItemAt(recyclerView.getChildAdapterPosition(view));
+                            items.remove(item);
+                            item.delete();
+
                             adapter.notifyDataSetChanged();
                             return true;
                         }
@@ -91,18 +95,23 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
         recyclerView.setAdapter(adapter);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged();
+    }
+
     public void onDateSet(DatePicker view, int year, int month, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
         Date date = calendar.getTime();
         shoppingList.setDate(date);
 
-        Button showDatePickerButton = (Button) findViewById(R.id.show_date_picker_button);
         showDatePickerButton.setText(SimpleDateFormat.getDateInstance().format(date));
     }
 
     public void addItem(View view) {
-        EditText itemNameEdit = (EditText) findViewById(R.id.new_item_name);
+        EditText itemNameEdit = (EditText) findViewById(R.id.new_item_name_edit);
         if (itemNameEdit.getText().toString().equals("")) {
             Toast.makeText(this, "Enter item name!", Toast.LENGTH_SHORT).show();
             return;
@@ -115,16 +124,15 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
     }
 
     public void saveList(View view) {
-        EditText nameEdit = (EditText) findViewById(R.id.list_name);
         if (nameEdit.getText().toString().equals("")) {
             Toast.makeText(this, "Enter list name!", Toast.LENGTH_SHORT).show();
             return;
         }
         shoppingList.setName(nameEdit.getText().toString());
+        shoppingList.save();
         for(ShoppingItem item : items){
             shoppingList.addItem(item);
         }
-        shoppingList.save();
 
         finish();
     }
@@ -132,6 +140,27 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
     public void showDataPickerDialog(View view) {
         DialogFragment newFragment = DatePickerFragment.newInstance(this);
         newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    private void initEmptyList(){
+        shoppingList = new ShoppingList();
+        items = new ArrayList<>();
+
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setTitle("New list");
+    }
+
+    private void initSelectedList(long listID){
+        shoppingList = ShoppingList.load(ShoppingList.class, listID);
+        items = shoppingList.items();
+
+        showDatePickerButton.setText(SimpleDateFormat.getDateInstance().format(shoppingList.getDate()));
+        nameEdit.setText(shoppingList.getName());
+
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setTitle("Edit list");
     }
 
 }

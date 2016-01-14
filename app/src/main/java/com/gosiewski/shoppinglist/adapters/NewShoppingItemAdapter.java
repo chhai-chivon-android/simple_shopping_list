@@ -20,7 +20,7 @@ public class NewShoppingItemAdapter extends RecyclerView.Adapter<NewShoppingItem
         public ViewHolder(RelativeLayout v) {
             super(v);
 
-            nameView = (TextView) v.findViewById(R.id.item_name);
+            nameView = (TextView) v.findViewById(R.id.new_item_name);
         }
     }
 

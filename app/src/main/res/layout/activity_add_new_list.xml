@@ -24,7 +24,7 @@
         android:text="@string/list_date_button"/>
 
     <EditText
-        android:id="@+id/new_item_name"
+        android:id="@+id/new_item_name_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/show_date_picker_button"
@@ -35,7 +35,7 @@
         android:onClick="addItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/new_item_name"
+        android:layout_below="@+id/new_item_name_edit"
         android:text="@string/add_item_button"/>
 
     <Button
@@ -48,7 +48,7 @@
 
     <android.support.v7.widget.RecyclerView
         android:paddingTop="15dp"
-        android:id="@+id/item_recycler_view"
+        android:id="@+id/recycler_view_new_shopping_items"
         android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

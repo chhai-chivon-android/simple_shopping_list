@@ -34,8 +34,6 @@ public class ListsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null)
             actionBar.setTitle("Lists");
-
-
     }
 
     @Override
@@ -43,7 +41,7 @@ public class ListsActivity extends AppCompatActivity {
         super.onResume();
         lists = ShoppingList.getAll();
 
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_lists);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_shopping_lists);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);

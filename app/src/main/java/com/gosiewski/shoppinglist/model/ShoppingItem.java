@@ -8,7 +8,7 @@ import com.activeandroid.annotation.Table;
 public class ShoppingItem extends Model {
     @Column(name = "name") public String name;
     @Column(name = "bought") public boolean alreadyBought;
-    @Column(name = "list") public ShoppingList list;
+    @Column(name = "list", onDelete = Column.ForeignKeyAction.CASCADE) public ShoppingList list;
 
     public ShoppingItem() {
         super();
