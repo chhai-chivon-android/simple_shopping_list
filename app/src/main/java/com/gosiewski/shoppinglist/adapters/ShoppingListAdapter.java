@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.gosiewski.shoppinglist.R;
-import com.gosiewski.shoppinglist.listeners.CustomItemClickListener;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
 import java.text.SimpleDateFormat;
@@ -16,7 +15,6 @@ import java.util.List;
 
 public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ViewHolder> {
     private List<ShoppingList> lists;
-    CustomItemClickListener listener;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView nameView;
@@ -35,22 +33,14 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         }
     }
 
-    public ShoppingListAdapter(List<ShoppingList> lists, CustomItemClickListener listener) {
+    public ShoppingListAdapter(List<ShoppingList> lists) {
         this.lists = lists;
-        this.listener = listener;
     }
 
     @Override
     public ShoppingListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shoppping_list, parent, false);
         final ViewHolder viewHolder = new ViewHolder(view);
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onItemClick(v, viewHolder.getPosition());
-                //TODO: It works, but only when u click between two lists. Why ? Repair it !
-            }
-        });
         return viewHolder;
     }
 

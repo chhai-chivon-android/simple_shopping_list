@@ -2,6 +2,7 @@ package com.gosiewski.shoppinglist.activities;
 
 import android.app.DatePickerDialog;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import com.gosiewski.shoppinglist.R;
 import com.gosiewski.shoppinglist.adapters.NewShoppingItemAdapter;
 import com.gosiewski.shoppinglist.fragments.DatePickerFragment;
+import com.gosiewski.shoppinglist.listeners.RecyclerViewOnGestureListener;
 import com.gosiewski.shoppinglist.model.ShoppingItem;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
@@ -49,37 +51,41 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
     @Override
     protected void onResume() {
         super.onResume();
-
         recyclerView = (RecyclerView) findViewById(R.id.item_recycler_view);
-
-        recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-                if (e.getAction() == MotionEvent.ACTION_UP) {
-                    View view = rv.findChildViewUnder(e.getX(), e.getY());
-                    if (view != null) {
-                        items.remove(rv.getChildAdapterPosition(view));
-                        adapter.notifyDataSetChanged();
-                        //TODO: Change it for working listener, like in ShoppingListAdapter
-                    }
-                }
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
-
         recyclerView.setHasFixedSize(true);
-
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+
+        final GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this,
+                new RecyclerViewOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
+                        if(view != null){
+                            items.remove(((NewShoppingItemAdapter) recyclerView.getAdapter()).getItemAt(recyclerView.getChildAdapterPosition(view)));
+                            adapter.notifyDataSetChanged();
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public void onLongPress(MotionEvent e) {
+
+                    }
+                }
+        );
+
+        recyclerView.addOnItemTouchListener(
+                new RecyclerView.OnItemTouchListener() {
+                    @Override
+                    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                        return gestureDetector.onTouchEvent(e);
+                    }
+                    @Override public void onTouchEvent(RecyclerView rv, MotionEvent e) {}
+                    @Override public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
+                }
+        );
 
         adapter = new NewShoppingItemAdapter(items);
         recyclerView.setAdapter(adapter);
