@@ -1,6 +1,7 @@
 package com.gosiewski.shoppinglist.activities;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBar;
@@ -8,11 +9,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.gosiewski.shoppinglist.R;
@@ -36,6 +42,7 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
     private RecyclerView.Adapter adapter;
     private Button showDatePickerButton;
     private EditText nameEdit;
+    public final static String EXTRA_EDIT_LIST_ID = "com.gosiewski.shoppinglist.EDITLISTID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +52,9 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
         showDatePickerButton = (Button) findViewById(R.id.show_date_picker_button);
         nameEdit = (EditText) findViewById(R.id.list_name);
 
-        long listId = getIntent().getLongExtra(ListDetailsActivity.EXTRA_EDIT_LIST_ID, -1);
+        long listId = getIntent().getLongExtra(EXTRA_EDIT_LIST_ID, 0);
 
-        if(listId < 0)
+        if(listId == 0)
             initEmptyList();
         else
             initSelectedList(listId);
@@ -63,13 +70,21 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
                     public boolean onSingleTapConfirmed(MotionEvent e) {
                         View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
                         if(view != null){
-                            ShoppingItem item = ((NewShoppingItemAdapter) recyclerView.getAdapter()).getItemAt(recyclerView.getChildAdapterPosition(view));
-                            items.remove(item);
-                            item.delete();
+                            ShoppingItem item = ((NewShoppingItemAdapter) recyclerView.getAdapter())
+                                    .getItemAt(recyclerView.getChildAdapterPosition(view));
 
+                            if (item.getId() != null)
+                                item.delete();
+
+                            items.remove(item);
                             adapter.notifyDataSetChanged();
+
+                            Toast.makeText(AddNewListActivity.this, "Item deleted",
+                                    Toast.LENGTH_SHORT).show();
+
                             return true;
                         }
+
                         return false;
                     }
 
@@ -101,6 +116,25 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.add_new_list_action_bar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.add_new_list_action_bar_edit :
+                saveList();
+                break;
+            default :
+                return super.onOptionsItemSelected(item);
+        }
+
+        return true;
+    }
+
     public void onDateSet(DatePicker view, int year, int month, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
@@ -112,28 +146,41 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
 
     public void addItem(View view) {
         EditText itemNameEdit = (EditText) findViewById(R.id.new_item_name_edit);
-        if (itemNameEdit.getText().toString().equals("")) {
-            Toast.makeText(this, "Enter item name!", Toast.LENGTH_SHORT).show();
+
+        if (itemNameEdit.getText().length() == 0) {
+            Toast.makeText(this, "Please enter item name", Toast.LENGTH_SHORT).show();
             return;
         }
-        String itemName = (itemNameEdit.getText().toString());
-        itemNameEdit.setText("");
+
+        String itemName = itemNameEdit.getText().toString();
+
         items.add(new ShoppingItem(itemName, shoppingList));
         adapter.notifyDataSetChanged();
+
+        itemNameEdit.setText("");
         Toast.makeText(this, "Item added", Toast.LENGTH_SHORT).show();
     }
 
-    public void saveList(View view) {
-        if (nameEdit.getText().toString().equals("")) {
-            Toast.makeText(this, "Enter list name!", Toast.LENGTH_SHORT).show();
+    public void saveList() {
+        if (nameEdit.getText().length() == 0) {
+            Toast.makeText(this, "Please enter list name", Toast.LENGTH_SHORT).show();
             return;
         }
-        shoppingList.setName(nameEdit.getText().toString());
-        shoppingList.save();
-        for(ShoppingItem item : items){
-            shoppingList.addItem(item);
+
+        if (shoppingList.getDate() == null) {
+            Toast.makeText(this, "Please select date", Toast.LENGTH_SHORT).show();
+            return;
         }
 
+        shoppingList.setName(nameEdit.getText().toString());
+        long listId = shoppingList.save();
+
+        for(ShoppingItem item : items)
+            shoppingList.addItem(item);
+
+        Intent intent = new Intent(this, ListDetailsActivity.class);
+        intent.putExtra(ListDetailsActivity.EXTRA_LIST_ID, listId);
+        startActivity(intent);
         finish();
     }
 
@@ -142,13 +189,15 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
-    private void initEmptyList(){
+    private void initEmptyList() {
         shoppingList = new ShoppingList();
         items = new ArrayList<>();
 
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null)
+        if(actionBar != null) {
             actionBar.setTitle("New list");
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     private void initSelectedList(long listID){
@@ -159,8 +208,12 @@ public class AddNewListActivity extends AppCompatActivity implements DatePickerD
         nameEdit.setText(shoppingList.getName());
 
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null)
+        if(actionBar != null) {
             actionBar.setTitle("Edit list");
+            actionBar.setDisplayShowHomeEnabled(false);
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            actionBar.setDefaultDisplayHomeAsUpEnabled(false);
+        }
     }
 
 }

@@ -19,26 +19,27 @@ import com.gosiewski.shoppinglist.model.ShoppingItem;
 import com.gosiewski.shoppinglist.model.ShoppingList;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class ListDetailsActivity extends AppCompatActivity {
+    private List<ShoppingItem>  items;
     private ShoppingList list;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    public final static String EXTRA_EDIT_LIST_ID = "com.gosiewski.shoppinglist.EDITLISTID";
+    private boolean realResumed = false;
+    public final static String EXTRA_LIST_ID = "com.gosiewski.shoppinglist.LISTID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_details);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
 
         Intent intent = getIntent();
-        this.list = ShoppingList.load(ShoppingList.class, intent.getLongExtra(ListsActivity.EXTRA_LIST_ID, 0));
+        list = ShoppingList.load(ShoppingList.class, intent.getLongExtra(EXTRA_LIST_ID, 0));
+        items = list.items();
 
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null) {
@@ -57,14 +58,18 @@ public class ListDetailsActivity extends AppCompatActivity {
                     @Override
                     public boolean onSingleTapConfirmed(MotionEvent e) {
                         View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
-                        if(view != null){
-                            ShoppingItem item = ((ShoppingItemAdapter) recyclerView.getAdapter()).getItemAt(recyclerView.getChildAdapterPosition(view));
+                        if(view != null) {
+                            ShoppingItem item = ((ShoppingItemAdapter)recyclerView.getAdapter())
+                                    .getItemAt(recyclerView.getChildAdapterPosition(view));
 
                             item.alreadyBought = !item.alreadyBought;
                             item.save();
+
                             adapter.notifyDataSetChanged();
+
                             return true;
                         }
+
                         return false;
                     }
 
@@ -86,8 +91,22 @@ public class ListDetailsActivity extends AppCompatActivity {
             @Override public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
         });
 
-        adapter = new ShoppingItemAdapter(list.items());
+        adapter = new ShoppingItemAdapter(items);
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (realResumed) {
+            items.clear();
+            items.addAll(list.items());
+
+            adapter.notifyDataSetChanged();
+        } else {
+            realResumed = true;
+        }
     }
 
     @Override
@@ -106,15 +125,17 @@ public class ListDetailsActivity extends AppCompatActivity {
                 deleteList();
                 break;
             default :
-                break;
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+
+        return true;
     }
 
-    public void editList(){
+    public void editList() {
         Intent intent = new Intent(this, AddNewListActivity.class);
-        intent.putExtra(EXTRA_EDIT_LIST_ID, list.getId());
+        intent.putExtra(AddNewListActivity.EXTRA_EDIT_LIST_ID, list.getId());
         startActivity(intent);
+        finish();
     }
 
     public void deleteList(){

@@ -5,6 +5,8 @@
     <dimen name="item_shopping_list_height">60dp</dimen>
     <dimen name="item_shopping_list_padding">20dp</dimen>
     <dimen name="item_shopping_list_text_size">16sp</dimen>
-    <dimen name="item_new_shopping_item_padding">20dp</dimen>
-    <dimen name="item_shopping_item_padding">20dp</dimen>
+    <dimen name="item_new_shopping_item_padding_horiz">20dp</dimen>
+    <dimen name="item_new_shopping_item_padding_vert">12dp</dimen>
+    <dimen name="item_shopping_item_padding_horiz">20dp</dimen>
+    <dimen name="item_shopping_item_padding_vert">12dp</dimen>
 </resources>

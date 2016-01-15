@@ -1,5 +1,7 @@
 package com.gosiewski.shoppinglist.model;
 
+import android.support.annotation.Nullable;
+
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
@@ -42,7 +44,11 @@ public class ShoppingList extends Model {
         return getMany(ShoppingItem.class, "list");
     }
 
+    @Nullable
     public Date getDate() {
+        if (timestamp == 0)
+            return null;
+
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(timestamp);
         return calendar.getTime();

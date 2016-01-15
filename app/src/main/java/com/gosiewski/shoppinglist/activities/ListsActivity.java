@@ -24,22 +24,18 @@ public class ListsActivity extends AppCompatActivity {
     private RecyclerView.Adapter adapter;
     private List<ShoppingList> lists;
     private RecyclerView.LayoutManager layoutManager;
-    public final static String EXTRA_LIST_ID = "com.gosiewski.shoppinglist.LISTID";
+    private boolean realResumed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lists);
 
+        lists = ShoppingList.getAll();
+
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null)
             actionBar.setTitle("Lists");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        lists = ShoppingList.getAll();
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_shopping_lists);
         recyclerView.setHasFixedSize(true);
@@ -80,6 +76,19 @@ public class ListsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (realResumed) {
+            lists.clear();
+            lists.addAll(ShoppingList.getAll());
+            adapter.notifyDataSetChanged();
+        } else {
+            realResumed = true;
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.lists_action_bar, menu);
         return true;
@@ -87,24 +96,27 @@ public class ListsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.lists_action_bar_add :
+        switch (item.getItemId()) {
+            case R.id.lists_action_bar_add:
                 addNewList();
                 break;
-            default :
-                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+
+        return true;
     }
 
-    private void addNewList(){
+    private void addNewList() {
         Intent intent = new Intent(this, AddNewListActivity.class);
+
         startActivity(intent);
     }
 
-    private void showList(ShoppingList list){
+    private void showList(ShoppingList list) {
         Intent intent = new Intent(this, ListDetailsActivity.class);
-        intent.putExtra(EXTRA_LIST_ID, list.getId());
+        intent.putExtra(ListDetailsActivity.EXTRA_LIST_ID, list.getId());
+
         startActivity(intent);
     }
 }
